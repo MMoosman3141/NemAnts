@@ -51,6 +51,9 @@ namespace NemAnts {
     private static string _ownerLetters = "abcdefghij";
     private static string _ownerNumbers = "0123456789";
 
+    /// <summary>
+    /// The number of rows in the grid.
+    /// </summary>
     public static int Rows {
       get {
         return _rows;
@@ -63,6 +66,10 @@ namespace NemAnts {
         }
       }
     }
+
+    /// <summary>
+    /// The number of columns in the grid.
+    /// </summary>
     public static int Cols {
       get {
         return _cols;
@@ -75,7 +82,15 @@ namespace NemAnts {
         }
       }
     }
+
+    /// <summary>
+    /// The grid as it is currently understood.
+    /// </summary>
     public static char[,] Grid { get; private set; }
+
+    /// <summary>
+    /// A list of ants owned by this app.
+    /// </summary>
     public static List<Ant> MyAnts {
       get {
         return _myAnts;
@@ -84,6 +99,10 @@ namespace NemAnts {
         _myAnts = value;
       }
     }
+
+    /// <summary>
+    /// A list of ants used to refresh the existance of ants owned by this app.
+    /// </summary>
     public static List<Ant> MyAntRefresh {
       get {
         return _myAntRefresh;
@@ -92,6 +111,10 @@ namespace NemAnts {
         _myAntRefresh = value;
       }
     }
+
+    /// <summary>
+    /// A list of food currently seen by ants owned by this app.
+    /// </summary>
     public static List<Tuple<int, int>> Food {
       get {
         return _food;
@@ -100,6 +123,10 @@ namespace NemAnts {
         _food = value;
       }
     }
+
+    /// <summary>
+    /// A list of ant hills owned by this app.
+    /// </summary>
     public static List<Tuple<int, int>> MyHills {
       get {
         return _myHills;
@@ -108,6 +135,10 @@ namespace NemAnts {
         _myHills = value;
       }
     }
+
+    /// <summary>
+    /// A list of enemy ant hills.
+    /// </summary>
     public static List<Tuple<int, int>> EnemyHills {
       get {
         return _enemyHills;
@@ -116,6 +147,10 @@ namespace NemAnts {
         _enemyHills = value;
       }
     }
+
+    /// <summary>
+    /// A list of enemy ants.
+    /// </summary>
     public static List<Ant> EnemyAnts {
       get {
         return _enemyAnts;
@@ -123,12 +158,6 @@ namespace NemAnts {
       set {
         _enemyAnts = value;
       }
-    }
-
-    public static Array DirectionsArray {get; set;}
-
-    static Map() {
-      DirectionsArray = Enum.GetValues(typeof(Directions));
     }
 
     private static void SetupGrid() {
@@ -141,6 +170,9 @@ namespace NemAnts {
       }
     }
 
+    /// <summary>
+    /// Clear the current grid of temporary items.  Reset or create lists.
+    /// </summary>
     public static void ClearGrid() {
       if (MyAnts == null) {
         MyAnts = new List<Ant>();
@@ -160,15 +192,31 @@ namespace NemAnts {
       }
     }
 
+    /// <summary>
+    /// Add water to the grid.
+    /// </summary>
+    /// <param name="row">The row coordinate of the water.</param>
+    /// <param name="col">The column coordinate of the water.</param>
     public static void AddWater(int row, int col) {
       SetGridSquare(row, col, SquareTypes.Water);
     }
 
+    /// <summary>
+    /// Add food to the grid.
+    /// </summary>
+    /// <param name="row">The row coordinate of the food.</param>
+    /// <param name="col">The column coordinate of the food.</param>
     public static void AddFood(int row, int col) {
       Food.Add(new Tuple<int, int>(row, col));
       SetGridSquare(row, col, SquareTypes.Food);
     }
 
+    /// <summary>
+    /// Add an ant hill to the grid.
+    /// </summary>
+    /// <param name="row">The row coordinate of the hill.</param>
+    /// <param name="col">The column coordinate of the hill.</param>
+    /// <param name="owner">The owner of the hill.  0 represents a hill owned by this app.</param>
     public static void AddHill(int row, int col, int owner) {
       if (owner == 0) {
         MyHills.Add(new Tuple<int, int>(row, col));
@@ -183,6 +231,12 @@ namespace NemAnts {
       }
     }
 
+    /// <summary>
+    /// Add an ant to the grid.
+    /// </summary>
+    /// <param name="row">The row coordinate of the ant.</param>
+    /// <param name="col">The column coordinate of the ant.</param>
+    /// <param name="owner">The owner of the ant.  0 represents ants owned by this app.</param>
     public static void AddAnt(int row, int col, int owner) {
       Ant newAnt = new Ant() { Row = row, Col = col, Owner = owner };
       if (owner == 0) {
@@ -194,10 +248,23 @@ namespace NemAnts {
       }
     }
 
+    /// <summary>
+    /// Add a dead ant to the grid.
+    /// </summary>
+    /// <param name="row">The row coordinate of the dead ant.</param>
+    /// <param name="col">The column coordinate of the dead ant.</param>
+    /// <param name="owner">The owner of the dead ant.  0 represents dead ants owned by this app.</param>
     public static void AddDeadAnt(int row, int col, int owner) {
       SetGridSquare(row, col, SquareTypes.DeadAnt);
     }
 
+    /// <summary>
+    /// Set the point in the grid according to the square type and owner.
+    /// </summary>
+    /// <param name="row">The coordinate row to set.</param>
+    /// <param name="col">The coordinate column to set.</param>
+    /// <param name="type">The type of value to store at the point.</param>
+    /// <param name="owner">For ants and hills, who owns this point.  0 represents points owned by this app.</param>
     public static void SetGridSquare(int row, int col, SquareTypes type, int owner = 0) {
       //Get whatever already exists in that square if there is anything.
       SquareTypes square = GetGridSquare(row, col);
@@ -284,10 +351,23 @@ namespace NemAnts {
       }
 
     }
+
+    /// <summary>
+    /// Set the point in the grid according to the square type and owner.
+    /// </summary>
+    /// <param name="point">The tuple coordinate representing the point in the grid.</param>
+    /// <param name="type">The type of value to store at the point.</param>
+    /// <param name="owner">For ants and hills, who owns this point.  0 represents points owned by this app.</param>
     public static void SetGridSquare(Tuple<int, int> point, SquareTypes type, int owner = 0) {
       SetGridSquare(point.Item1, point.Item2, type, owner);
     }
 
+    /// <summary>
+    /// Gets what is stored at the point of the grid.
+    /// </summary>
+    /// <param name="row">The row coordinated to check.</param>
+    /// <param name="col">The column coordinate to check.</param>
+    /// <returns>A SquareTypes value with bit flags representing the various things stored in the grid at the specified point.</returns>
     public static SquareTypes GetGridSquare(int row, int col) {
       char square = Grid[row, col];
       SquareTypes squareValue = SquareTypes.Unknown;
@@ -322,23 +402,57 @@ namespace NemAnts {
 
       return squareValue;
     }
+
+    /// <summary>
+    /// Gets what is stored at the point of the grid.
+    /// </summary>
+    /// <param name="point">A tuple representing the point in the grid.</param>
+    /// <returns>A SquareTypes value with bit flags representing the various things stored in the grid at the specified point.</returns>
     public static SquareTypes GetGridSquare(Tuple<int, int> point) {
       return GetGridSquare(point.Item1, point.Item2);
     }
 
+    /// <summary>
+    /// Get the coordinate information directly above the specified point
+    /// </summary>
+    /// <param name="point">A Tuple representing a point in the grid.</param>
+    /// <returns>A Tuple representing the point directly above the specified point.</returns>
     public static Tuple<int, int> GetNorthPoint(Tuple<int, int> point) {
       return new Tuple<int, int>(point.Item1 - 1 < 0 ? Map.Rows - 1 : point.Item1 - 1, point.Item2);
     }
+
+    /// <summary>
+    /// Get the coordinate information directly below the specified point
+    /// </summary>
+    /// <param name="point">A Tuple representing a point in the grid.</param>
+    /// <returns>A Tuple representing the point directly below the specified point.</returns>
     public static Tuple<int, int> GetSouthPoint(Tuple<int, int> point) {
       return new Tuple<int, int>(point.Item1 + 1 == Map.Rows ? 0 : point.Item1 + 1, point.Item2);
     }
+
+    /// <summary>
+    /// Get the coordinate information directly left of the specified point
+    /// </summary>
+    /// <param name="point">A Tuple representing a point in the grid.</param>
+    /// <returns>A Tuple representing the point directly left of the specified point.</returns>
     public static Tuple<int, int> GetWestPoint(Tuple<int, int> point) {
       return new Tuple<int, int>(point.Item1, point.Item2 - 1 < 0 ? Map.Cols - 1 : point.Item2 - 1);
     }
+
+    /// <summary>
+    /// Get the coordinate information directly right of the specified point
+    /// </summary>
+    /// <param name="point">A Tuple representing a point in the grid.</param>
+    /// <returns>A Tuple representing the point directly right of the specified point.</returns>
     public static Tuple<int, int> GetEastPoint(Tuple<int, int> point) {
       return new Tuple<int, int>(point.Item1, point.Item2 + 1 == Map.Cols ? 0 : point.Item2 + 1);
     }
 
+    /// <summary>
+    /// Gets the four points around the specified point.
+    /// </summary>
+    /// <param name="square">A Tuple representing a point in the grid.</param>
+    /// <returns>A List of Tuple values representing the four points around the specified point.</returns>
     public static List<Tuple<int, int>> GetAdjacentSquares(Tuple<int, int> square) {
       List<Tuple<int, int>> squares = new List<Tuple<int, int>>();
       squares.Add(GetNorthPoint(square));
@@ -349,13 +463,20 @@ namespace NemAnts {
       return squares;
     }
 
+    /// <summary>
+    /// Get all the routes in the grid from point a to various other points.
+    /// </summary>
+    /// <param name="here">The starting point for the routes.</param>
+    /// <param name="theres">Various ending points for the routes.</param>
+    /// <param name="maxLookDistance">The maximum distance to look for a route.  Routes can not be longer than this value.</param>
+    /// <param name="limit">The number of routes to look for.</param>
+    /// <returns>Returns a List of routes from here to the various points in the theres.</returns>
     public static List<List<Tuple<int, int>>> GetRoutes(Tuple<int, int> here, List<Tuple<int, int>> theres, int maxLookDistance, int limit = int.MaxValue) {
       List<List<Tuple<int, int>>> routes = new List<List<Tuple<int, int>>>();
 
       int foundCount = 0;
       for(int index = 0; index < theres.Count; index++) {
         Tuple<int, int> there = theres[index];
-      //foreach (Tuple<int, int> there in theres) {
         List<Tuple<int, int>> route = Map.ShortestRoute(here, there, maxLookDistance);
 
         if (route == null)
@@ -372,6 +493,15 @@ namespace NemAnts {
 
       //return theres.Select(point => Map.ShortestRoute(here, point, maxLookDistance)).Where(route => route != null).ToList();
     }
+
+    /// <summary>
+    /// Gets the shortest route from point A (here) to various other points (theres).
+    /// </summary>
+    /// <param name="here">The starting point for all the routes evaluated.</param>
+    /// <param name="theres">The various ending points for all the routes evaluated.</param>
+    /// <param name="maxLookDistance">The maximum distance a route can be.</param>
+    /// <param name="limit">A limit on the number of routes to look for.</param>
+    /// <returns>The shortest of various routes.</returns>
     public static List<Tuple<int, int>> GetShortestRoute(Tuple<int, int> here, List<Tuple<int, int>> theres, int maxLookDistance, int limit = int.MaxValue) {
       List<List<Tuple<int, int>>> routes = GetRoutes(here, theres, maxLookDistance, limit);
 
@@ -384,6 +514,11 @@ namespace NemAnts {
       return shortest;
     }
 
+    /// <summary>
+    /// Checks if a square is a valid point to move to.
+    /// </summary>
+    /// <param name="point">A Tuple point to check.</param>
+    /// <returns>True if the point is a valid point to move to.  False otherwise.</returns>
     public static bool IsAvailableSquare(Tuple<int, int> point) {
       SquareTypes destSquare = Map.GetGridSquare(point);
 
@@ -409,6 +544,13 @@ namespace NemAnts {
       return true;
     }
 
+    /// <summary>
+    /// Find the shortest route from point A to point B.
+    /// </summary>
+    /// <param name="pointA">The starting point.</param>
+    /// <param name="pointB">The ending point.</param>
+    /// <param name="maxDistance">The maximum number of steps allowed.</param>
+    /// <returns>A List of Tuple points representing the shortest way to get from point A to point B.</returns>
     public static List<Tuple<int, int>> ShortestRoute(Tuple<int, int> pointA, Tuple<int, int> pointB, int maxDistance) {
       int[,] grid = new int[Rows, Cols];
 
@@ -450,6 +592,15 @@ namespace NemAnts {
       return route;
     }
 
+    /// <summary>
+    /// Marks the distance in a grid showing the distance values from point A to the destination.
+    /// This function runs recursively in order to fill out the grid with distance values allowing the determination of the shortest route from one point to another.
+    /// </summary>
+    /// <param name="pointA">The starting point.</param>
+    /// <param name="destination">The ending point.</param>
+    /// <param name="grid">The grid in which distances are measured.</param>
+    /// <param name="distance">The current distance value.  Each recursive call increments this value to put into the grid.</param>
+    /// <param name="maxDistance">The furthest distance to mark up in the grid.</param>
     private static void MarkDistance(Tuple<int, int> pointA, Tuple<int, int> destination, int[,] grid, int distance, int maxDistance) {
       if (distance > maxDistance)
         return;

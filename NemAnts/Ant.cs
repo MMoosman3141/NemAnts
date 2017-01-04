@@ -16,22 +16,60 @@ namespace NemAnts {
   }
 
   public class Ant {
+    /// <summary>
+    /// The radius squared that each ant can see around itself.
+    /// </summary>
     public static int ViewRadiusSqrd { get; set; }
-    public static int AttackRadiusSqrd { get; set; }
-    public static int SpawnRadiusSqrd { get; set; }
-    public static Random _rnd = new Random();
 
+    /// <summary>
+    /// The radius squared that ants attack each other at.
+    /// </summary>
+    public static int AttackRadiusSqrd { get; set; }
+
+    /// <summary>
+    /// The radius squared at which food is collected.
+    /// </summary>
+    public static int SpawnRadiusSqrd { get; set; }
+
+    private static Random _rnd = new Random();
+
+    /// <summary>
+    /// What is this ant currently trying to do.
+    /// </summary>
     public AntActions AntAction { get; set; } = AntActions.None;
+
+    /// <summary>
+    /// Which player owns this ant.  Player 0 is this app.
+    /// </summary>
     public int Owner { get; set; }
+
+    /// <summary>
+    /// What row in the Map.Grid is the ant located at.
+    /// </summary>
     public int Row { get; set; }
+
+    /// <summary>
+    /// What column in the Map.Grid is the ant located at.
+    /// </summary>
     public int Col { get; set; }
+
+    /// <summary>
+    /// Returns back a Tuple cooridinate of the Row and Col for the position of the ant.
+    /// </summary>
     public Tuple<int, int> CurrentPos {
       get {
         return new Tuple<int, int>(Row, Col);
       }
     }
+
+    /// <summary>
+    /// A route which the ant may be on to collect food, attack an enemy, or follow another ant.
+    /// </summary>
     public List<Tuple<int, int>> Route { get; set; }
 
+    /// <summary>
+    /// Take action for the ant.  This includes doing things like locating routes to food, enemies, or other ants, and moving.
+    /// </summary>
     public void TakeAction() {
       List<Tuple<int, int>> possibleMoves = Map.GetAdjacentSquares(CurrentPos);
 
