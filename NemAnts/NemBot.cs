@@ -18,6 +18,9 @@ namespace NemAnts {
     private static int _turnTime;
     private static Stopwatch _stopwatch;
 
+    /// <summary>
+    /// A timer which can be checked against to see if the turn is nearing completion.
+    /// </summary>
     public static Stopwatch TurnStopWatch {
       get {
         return _stopwatch;
@@ -27,7 +30,14 @@ namespace NemAnts {
       }
     }
 
+    /// <summary>
+    /// The amount of time allowed to perform load functions.
+    /// </summary>
     public int LoadTime { get; set; }
+
+    /// <summary>
+    /// The amount of time allowed to take our turn.
+    /// </summary>
     public static int TurnTime {
       get {
         return _turnTime;
@@ -36,15 +46,34 @@ namespace NemAnts {
         _turnTime = value;
       }
     }
+
+    /// <summary>
+    /// The current turn in the game.
+    /// </summary>
     public int CurrentTurn { get; set; }
+
+    /// <summary>
+    /// The maximum number of turns in the game.
+    /// </summary>
     public int MaxTurns { get; set; }
+
+    /// <summary>
+    /// A seed value which can be used in order to duplicate games where ants move randomly.
+    /// </summary>
     public Int64 PlayerSeed { get; set; }
+
+    /// <summary>
+    /// The state the game is currently in.
+    /// </summary>
     public GameStates GameState { get; set; } = GameStates.None;
 
+    /// <summary>
+    /// Get the bot going.  Checks for messages, performs set up, updates, and turns.
+    /// </summary>
+    /// <returns></returns>
     public Task Start() {
       return Task.Run(() => {
         NemBot.TurnStopWatch = new Stopwatch();
-        //NemBot.TurnStopWatch.Start();
 
         bool done = false;
         do {
@@ -88,6 +117,11 @@ namespace NemAnts {
       });
     }
 
+    /// <summary>
+    /// Read set up values.
+    /// </summary>
+    /// <param name="type">The type of value.</param>
+    /// <param name="value">The value to set.</param>
     private void ReadSetup(string type, string value) {
       switch(type) {
         case "loadtime":
@@ -120,7 +154,11 @@ namespace NemAnts {
       }
     }
 
-
+    /// <summary>
+    /// Update information.
+    /// </summary>
+    /// <param name="type">The type of the value.</param>
+    /// <param name="value">The value to set.</param>
     private void UpdateInformation(string type, string value) {
       string[] values = value.Split(default(string[]), StringSplitOptions.RemoveEmptyEntries);
 
@@ -154,6 +192,9 @@ namespace NemAnts {
       }
     }
 
+    /// <summary>
+    /// Reconcile updated information about ants with existing information about ants.
+    /// </summary>
     private void ReconcileAnts() {
       AntComparer antComparer = new AntComparer();
       IEnumerable<Ant> routedAnts = Map.MyAnts.Where(ant => (ant.Route?.Count ?? 0) > 0);
@@ -163,6 +204,9 @@ namespace NemAnts {
       Map.MyAnts = existing.Union(Map.MyAntRefresh, antComparer).ToList();
     }
 
+    /// <summary>
+    /// Take my turn.  Try to end a little early if we're approaching our end of turn time.
+    /// </summary>
     private void TakeTurn() {
       for (int index = 0; index < Map.MyAnts.Count; index++) {
         Ant ant = Map.MyAnts[index];
@@ -174,6 +218,9 @@ namespace NemAnts {
       }
     }
 
+    /// <summary>
+    /// Send a go message to the ants game.
+    /// </summary>
     private void Go() {
       GameState = GameStates.None;
       Console.WriteLine("go");
