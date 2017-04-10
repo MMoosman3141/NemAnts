@@ -71,12 +71,18 @@ namespace NemAnts {
     /// Take action for the ant.  This includes doing things like locating routes to food, enemies, or other ants, and moving.
     /// </summary>
     public void TakeAction() {
+      Stopwatch actionTimer = new Stopwatch();
+      actionTimer.Start();
+
       List<Tuple<int, int>> possibleMoves = Map.GetAdjacentSquares(CurrentPos);
+      Trace.WriteLine($"*****    1 - {actionTimer.ElapsedMilliseconds}");
 
       //Find the valid moves in the possible moves.
       List<Tuple<int, int>> validMoves = (from possibleMove in possibleMoves
                                           where Map.IsAvailableSquare(possibleMove)
                                           select possibleMove).ToList();
+
+      Trace.WriteLine($"*****    2 - {actionTimer.ElapsedMilliseconds}");
 
       //If the ant is completely boxed in, don't try to move.  If we have a route delete it.
       if (validMoves.Count == 0) {
@@ -85,6 +91,8 @@ namespace NemAnts {
         }
         return;
       }
+
+      Trace.WriteLine($"*****    3 - {actionTimer.ElapsedMilliseconds}");
 
       //If there is only one valid move, move there.  Adjust route if that move is along the route, othewise delete the route.
       if (validMoves.Count == 1) {
@@ -97,6 +105,8 @@ namespace NemAnts {
           return;
         }
       }
+
+      Trace.WriteLine($"*****    4 - {actionTimer.ElapsedMilliseconds}");
 
       //If an adjacent square is an enemy hill or is food take appropriate action.
       for (int moveIndex = 0; moveIndex < possibleMoves.Count; moveIndex++) {
@@ -114,28 +124,7 @@ namespace NemAnts {
         }
       }
 
-      
-      //if I already have a route move along the route.
-      if ((Route?.Count ?? 0) > 0) {
-        //if my action is to actack an enemy or to follow a friend, and I have a route, move along that route regardless of the fact that the enemy will have moved on.
-        if(AntAction == AntActions.AttackingEnemy || AntAction == AntActions.Following) {
-          if(TryMove(CurrentPos, Route[0])) {
-            Route.RemoveAt(0);
-            return;
-          }
-        } else {
-          //If the route is toward food or an enemy hill and the end of the route no longer matches that, remove the route.
-          SquareTypes lastSquare = Map.GetGridSquare(Route.Last());
-          if (lastSquare.HasFlag(SquareTypes.Food) || lastSquare.HasFlag(SquareTypes.EnemyHill)) {
-            if (TryMove(CurrentPos, Route[0])) {
-              Route.RemoveAt(0);
-              return;
-            }
-          } else {
-            Route = null;
-          }
-        }
-      }
+      Trace.WriteLine($"*****    5 - {actionTimer.ElapsedMilliseconds}");
 
       //If we're short on time, just move randomly.
       if (NemBot.TurnStopWatch.ElapsedMilliseconds >= NemBot.TurnTime - 100) {
@@ -143,42 +132,61 @@ namespace NemAnts {
         return;
       }
 
-      //look for nearby food, set a route and head down that route.
-      if (AttemptRoute(Map.Food, 10, 1, AntActions.MovingToFood, validMoves)) {
-        return;
+      Trace.WriteLine($"*****    6 - {actionTimer.ElapsedMilliseconds}");
+
+      if((Route?.Count ?? 0) > 0) {
+        if(TryMove(CurrentPos, Route[0])) {
+          Route.RemoveAt(0);
+          return;
+        }
       }
 
-      int distance = 20;
+      Trace.WriteLine($"*****    7 - {actionTimer.ElapsedMilliseconds}");
+
+      int distance = (int)Math.Sqrt((double)ViewRadiusSqrd);
+      int attackDist = Math.Min(Map.Rows, Map.Cols) / 2;
+
+      Trace.WriteLine($"*****    8 - {actionTimer.ElapsedMilliseconds}");
 
       //If there is an enemy hill nearby set a route toward it and start down the route.
-      if (AttemptRoute(Map.EnemyHills, distance, 1, AntActions.AttackingHill, validMoves)) {
+      if (AttemptRoute(Map.EnemyHills, attackDist, 1, AntActions.AttackingHill, validMoves)) {
         return;
       }
+
+      Trace.WriteLine($"*****    9 - {actionTimer.ElapsedMilliseconds}");
 
       //if there is an enemy ant nearby move in that general direction
       List<Tuple<int, int>> enemyAnts = Map.EnemyAnts.Select(ant => ant.CurrentPos).ToList();
-      if (AttemptRoute(enemyAnts, distance, 1, AntActions.AttackingEnemy, validMoves)) {
+      if (AttemptRoute(enemyAnts, distance * 4, 1, AntActions.AttackingEnemy, validMoves)) {
         return;
       }
 
+      Trace.WriteLine($"*****    10 - {actionTimer.ElapsedMilliseconds}");
+
       //look for nearby food, set a route and head down that route.
-      if (AttemptRoute(Map.Food, distance, 1, AntActions.MovingToFood, validMoves)) {
+      if (AttemptRoute(Map.Food, distance * 2, 1, AntActions.MovingToFood, validMoves)) {
         return;
       }
+
+      Trace.WriteLine($"*****    11 - {actionTimer.ElapsedMilliseconds}");
 
       //try to follow some other ant.
       List<Tuple<int, int>> activeAnts = Map.MyAnts.Where(ant => ant.AntAction != AntActions.None).Select(ant => new Tuple<int, int>(ant.Row, ant.Col)).ToList();
-      if (AttemptRoute(activeAnts, 10, 1, AntActions.Following, validMoves)) {
+      if (AttemptRoute(activeAnts, distance * 2, 1, AntActions.Following, validMoves)) {
         return;
       }
 
+      Trace.WriteLine($"*****    12 - {actionTimer.ElapsedMilliseconds}");
+
       //If we've gotten this far then we just want to try to move randomly.
       TryMove(CurrentPos, validMoves[_rnd.Next(validMoves.Count)]);
+
+      Trace.WriteLine($"*****    13 - {actionTimer.ElapsedMilliseconds}");
     }
 
     private bool TryMove(Tuple<int, int> currentPos, Tuple<int, int> destination) {
       if (!Map.GetGridSquare(currentPos).HasFlag(SquareTypes.Friendly)) {
-        Trace.WriteLine("*****   Attempting to move illegal ant.");
+        Trace.WriteLine("***** Attempting to move illegal ant.");
         return false;
       }
 
@@ -209,6 +217,12 @@ namespace NemAnts {
     }
 
     private bool AttemptRoute(List<Tuple<int, int>> optionPoints, int distance, int limit, AntActions actionValue, List<Tuple<int, int>> validMoves) {
+      //If we're short on time, just move randomly.
+      if (NemBot.TurnStopWatch.ElapsedMilliseconds >= NemBot.TurnTime - 250) {
+        TryMove(CurrentPos, validMoves[_rnd.Next(validMoves.Count)]);
+        return true;
+      }
+
       if ((optionPoints?.Count ?? 0) == 0)
         return false;
 
@@ -223,12 +237,6 @@ namespace NemAnts {
           Route.RemoveAt(0);
           return true;
         }
-      }
-
-      //If we're short on time, just move randomly.
-      if (NemBot.TurnStopWatch.ElapsedMilliseconds >= NemBot.TurnTime - 100) {
-        TryMove(CurrentPos, validMoves[_rnd.Next(validMoves.Count)]);
-        return true;
       }
 
       return false;
