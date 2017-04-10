@@ -490,8 +490,6 @@ namespace NemAnts {
       }
 
       return routes;
-
-      //return theres.Select(point => Map.ShortestRoute(here, point, maxLookDistance)).Where(route => route != null).ToList();
     }
 
     /// <summary>
@@ -605,35 +603,16 @@ namespace NemAnts {
       if (distance > maxDistance)
         return;
 
-      Tuple<int, int> north = GetNorthPoint(pointA);
-      if (north.Equals(destination)) {
+      List<Tuple<int, int>> points = GetAdjacentSquares(pointA);
+
+      int destCount = points.Count(point => point.Equals(destination));
+      if (destCount > 0) {
         return;
       }
-
-      Tuple<int, int> south = GetSouthPoint(pointA);
-      if (south.Equals(destination)) {
-        return;
-      }
-
-      Tuple<int, int> west = GetWestPoint(pointA);
-      if (west.Equals(destination)) {
-        return;
-      }
-
-      Tuple<int, int> east = GetEastPoint(pointA);
-      if (east.Equals(destination)) {
-        return;
-      }
-
-      List<Tuple<int, int>> points = new List<Tuple<int, int>>();
-      points.Add(north);
-      points.Add(south);
-      points.Add(west);
-      points.Add(east);
 
       for(int index = 0; index < points.Count; index++) {
         Tuple<int, int> point = points[index];
-      //foreach(Tuple<int, int> point in points) {
+
         if (grid[point.Item1, point.Item2] == -1 || grid[point.Item1, point.Item2] == 0 || grid[point.Item1, point.Item2] <= distance) {
           continue;
         }

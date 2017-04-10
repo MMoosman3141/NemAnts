@@ -17,6 +17,7 @@ namespace NemAnts {
   public class NemBot {
     private static int _turnTime;
     private static Stopwatch _stopwatch;
+    private Random _rnd;
 
     /// <summary>
     /// A timer which can be checked against to see if the turn is nearing completion.
@@ -74,6 +75,7 @@ namespace NemAnts {
     public Task Start() {
       return Task.Run(() => {
         NemBot.TurnStopWatch = new Stopwatch();
+        _rnd = new Random();
 
         bool done = false;
         do {
@@ -84,7 +86,7 @@ namespace NemAnts {
           switch (type) {
             case "turn":
               CurrentTurn = int.Parse(value);
-              if(CurrentTurn == 0) {
+              if (CurrentTurn == 0) {
                 GameState = GameStates.Setup;
               } else {
                 GameState = GameStates.Update;
@@ -208,13 +210,20 @@ namespace NemAnts {
     /// Take my turn.  Try to end a little early if we're approaching our end of turn time.
     /// </summary>
     private void TakeTurn() {
-      for (int index = 0; index < Map.MyAnts.Count; index++) {
-        Ant ant = Map.MyAnts[index];
-        ant.TakeAction();
+      int activeCount = Map.MyAnts.Count;  //Math.Min(Map.MyAnts.Count, 50);
 
-        if (NemBot.TurnStopWatch.ElapsedMilliseconds >= NemBot.TurnTime - 100) {
+      List<Ant> rndAnts = Map.MyAnts.OrderBy(num => _rnd.Next()).ToList();
+
+      for (int index = 0; index < activeCount; index++) {
+        if (NemBot.TurnStopWatch.ElapsedMilliseconds >= NemBot.TurnTime - 250) {
           break;
         }
+        
+        Ant ant = rndAnts[index];
+
+        Trace.WriteLine("***** Start Action");
+        ant.TakeAction();
+        Trace.WriteLine("***** End Action");
       }
     }
 
